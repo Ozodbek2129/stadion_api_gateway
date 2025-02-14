@@ -1,10 +1,11 @@
 package handler
 
 import (
-	pb "apigateway/genproto/stadium"
 	pb1 "apigateway/genproto/register"
+	pb "apigateway/genproto/stadium"
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +17,7 @@ func (h *Handler) CreateStadium(c *gin.Context) {
 		return
 	}
 
-	resp,err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: stadium.UserId})
+	resp, err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: stadium.UserId})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,7 +44,7 @@ func (h *Handler) UpdateStadium(c *gin.Context) {
 		return
 	}
 
-	resp,err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: stadium.UserId})
+	resp, err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: stadium.UserId})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -95,6 +96,34 @@ func (h *Handler) GetStadiums(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+func (h *Handler) GetAllStadium(c *gin.Context) {
+	limit, err := strconv.Atoi(c.Param("limit"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
+		return
+	}
+
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
+		return
+	}
+
+	// Proto request obyektini yaratish
+	stadium := pb.GetAllStadiumRequest{
+		Limit: int32(limit),
+		Page:  int32(page),
+	}
+
+	resp, err := h.Stadium.GetAllStadium(context.Background(), &stadium)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
 func (h *Handler) DeleteStadium(c *gin.Context) {
 	stadium := pb.DeleteStadiumRequest{}
 	if err := c.ShouldBindJSON(&stadium); err != nil {
@@ -118,7 +147,7 @@ func (h *Handler) CreateOrderStadium(c *gin.Context) {
 		return
 	}
 
-	resp,err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: order.UserId})
+	resp, err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: order.UserId})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -177,7 +206,7 @@ func (h *Handler) UpdateOrderStadium(c *gin.Context) {
 		return
 	}
 
-	resp,err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: order.UserId})
+	resp, err := h.UserService.CheckUserId(context.Background(), &pb1.CheckUserIdRequest{Id: order.UserId})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -22,6 +22,7 @@ func NewRouter() *gin.Engine {
 	s.PUT("/updateorderstadium", h.UpdateOrderStadium)
 	s.DELETE("/deleteorderstadium", h.DeleteOrderStadium)
 	s.GET("/getdeleteorderstadium", h.GetDeletedOrderStadiums)
+	s.GET("/getallstadium", h.GetAllStadium)
 
 	u := router.Group("/user")
 	u.POST("/tobeanadmin", h.Tobeanadmin)
