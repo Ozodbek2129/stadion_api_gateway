@@ -4,6 +4,7 @@ import (
 	pb1 "apigateway/genproto/register"
 	pb "apigateway/genproto/stadium"
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -97,31 +98,42 @@ func (h *Handler) GetStadiums(c *gin.Context) {
 }
 
 func (h *Handler) GetAllStadium(c *gin.Context) {
-	limit, err := strconv.Atoi(c.Param("limit"))
+	limitStr := c.Query("limit")
+	pageStr := c.Query("page")
+
+	limit := 10 // Default limit
+	if limitStr != "" {
+		l, err := strconv.Atoi(limitStr)
+		if err == nil {
+			limit = l
+		}
+	}
+
+	page := 1 // Default page
+	if pageStr != "" {
+		p, err := strconv.Atoi(pageStr)
+		if err == nil {
+			page = p
+		}
+	}
+	fmt.Println(limit, page)
+
+	limitInt32 := int32(limit)
+	pageInt32 := int32(page)
+
+	req := pb.GetAllStadiumRequest{
+		Limit: limitInt32,
+		Page:  pageInt32,
+	}
+
+	resp, err := h.Stadium.GetAllStadium(c, &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
+		h.Log.Error(fmt.Sprintf("error retrieving all stadium information %v", err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	page, err := strconv.Atoi(c.Param("page"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
-		return
-	}
-
-	// Proto request obyektini yaratish
-	stadium := pb.GetAllStadiumRequest{
-		Limit: int32(limit),
-		Page:  int32(page),
-	}
-
-	resp, err := h.Stadium.GetAllStadium(context.Background(), &stadium)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusAccepted, resp)
 }
 
 func (h *Handler) DeleteStadium(c *gin.Context) {

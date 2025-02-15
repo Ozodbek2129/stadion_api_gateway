@@ -12,7 +12,7 @@ func NewRouter() *gin.Engine {
 
 	s := router.Group("/stadium")
 	s.POST("/createstadium", h.CreateStadium)
-	s.POST("/updatestadium", h.UpdateStadium)
+	s.PUT("/updatestadium", h.UpdateStadium)
 	s.GET("/getstadium", h.GetStadium)
 	s.GET("/getstadiums", h.GetStadiums)
 	s.DELETE("/deletestadium", h.DeleteStadium)
